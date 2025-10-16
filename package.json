@@ -1,0 +1,16 @@
+{
+  "name": "rongcheng-mobile-admin",
+  "version": "1.0.0",
+  "description": "荣诚商家移动管理端 - Netlify部署版",
+  "type": "module",
+  "scripts": {
+    "build": "echo 'No build step needed for static site'"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.38.0",
+    "bcryptjs": "^2.4.3"
+  },
+  "engines": {
+    "node": ">=18.0.0"
+  }
+}
