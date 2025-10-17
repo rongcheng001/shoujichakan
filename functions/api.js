@@ -3,8 +3,9 @@ import bcrypt from 'bcryptjs';
 
 // 初始化 Supabase 客户端
 const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_SERVICE_KEY
+  process.env.SUPABASE_URL = "https://pwsmicdepzjqsodpedlw.supabase.co";
+process.env.SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3c21pY2RlcHpqcXNvZHBlZGx3Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTgwMTY3MDIsImV4cCI6MjA3MzU5MjcwMn0.GCvgIDRunf6U9SFK8affQr13y9nWmxr3IKbzCb-HPbA";
+process.env.SUPABASE_SERVICE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InB3c21pY2RlcHpqcXNvZHBlZGx3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc1ODAxNjcwMiwiZXhwIjoyMDczNTkyNzAyfQ.5zOCusteMrUK8x0-LTAmWG1m63WpMWdS7KBsBtYUP88"
 );
 
 // 工具函数：格式化活动时间
