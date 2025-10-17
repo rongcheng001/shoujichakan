@@ -226,7 +226,8 @@
                 <div class="subtitle">超级管理员登录</div>
             </div>
             
-            <div class="error-message" id="login-error"></div>
+            <div class="error-message" id="error-message"></div>
+<div class="success-message" id="success-message"></div>
             
             <div class="card login-form">
                 <div class="input-group">
@@ -364,22 +365,26 @@
     </div>
 
     <script>
-        const API_BASE = window.location.origin;
+        const API_BASE = window.location.origin + '/.netlify/functions/api';
         let currentUser = null;
         let currentData = null;
 
         // 显示消息
         function showMessage(type, message) {
-            const element = document.getElementById(type + '-message');
-            element.textContent = message;
-            element.style.display = 'block';
-            
-            if (type === 'success') {
-                setTimeout(() => {
-                    element.style.display = 'none';
-                }, 3000);
-            }
+    const element = document.getElementById(type + '-message');
+    if (element) {
+        element.textContent = message;
+        element.style.display = 'block';
+        
+        if (type === 'success') {
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 3000);
         }
+    } else {
+        console.error('Element not found:', type + '-message');
+    }
+}
 
         // 隐藏消息
         function hideMessages() {
