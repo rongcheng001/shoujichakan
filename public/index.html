@@ -220,47 +220,45 @@
 <body>
     <div class="container">
         <!-- 登录界面 -->
-        <div id="login-screen">
-            <div class="header">
-                <h1>荣诚商家管理</h1>
-                <div class="subtitle">超级管理员登录</div>
-            </div>
-            
-            <div class="error-message" id="error-message"></div>
-<div class="success-message" id="success-message"></div>
-            
-            <div class="card login-form">
-                <div class="input-group">
-                    <input type="email" class="input" id="loginEmail" placeholder="管理员邮箱" value="">
-                </div>
-                <div class="input-group">
-                    <input type="password" class="input" id="loginPassword" placeholder="密码" value="">
-                </div>
-                <button class="btn" onclick="login()">
-                    <span>🔐</span> 登录系统
-                </button>
-                
-                <div style="text-align: center; margin-top: 20px; font-size: 12px; color: #666;">
-                    请使用超级管理员账户登录
-                </div>
-            </div>
+        <!-- 在登录界面和主界面都添加消息容器 -->
 
-            <div class="card" style="text-align: center; background: rgba(255,255,255,0.1); color: white;">
-                <div style="font-size: 14px; margin-bottom: 10px;">📱 移动管理端</div>
-                <div style="font-size: 12px; opacity: 0.8;">随时随地管理您的商家后台</div>
-            </div>
+<!-- 登录界面 -->
+<div id="login-screen">
+    <div class="header">
+        <h1>荣诚商家管理</h1>
+        <div class="subtitle">超级管理员登录</div>
+    </div>
+    
+    <!-- 登录错误消息 -->
+    <div class="error-message" id="login-error-message" style="display: none;"></div>
+    
+    <div class="card login-form">
+        <!-- 登录表单内容保持不变 -->
+        <div class="input-group">
+            <input type="email" class="input" id="loginEmail" placeholder="管理员邮箱">
         </div>
+        <div class="input-group">
+            <input type="password" class="input" id="loginPassword" placeholder="密码">
+        </div>
+        <button class="btn" onclick="login()">
+            <span>🔐</span> 登录系统
+        </button>
+    </div>
+</div>
 
-        <!-- 主界面 -->
-        <div id="main-screen" style="display: none;">
-            <div class="header">
-                <h1>移动管理端</h1>
-                <div class="subtitle" id="adminInfo">超级管理员面板</div>
-            </div>
+<!-- 主界面 -->
+<div id="main-screen" style="display: none;">
+    <div class="header">
+        <h1>移动管理端</h1>
+        <div class="subtitle" id="adminInfo">超级管理员面板</div>
+    </div>
 
-            <div class="error-message" id="error-message"></div>
-            <div class="success-message" id="success-message"></div>
+    <!-- 主界面消息 -->
+    <div class="error-message" id="main-error-message" style="display: none;"></div>
+    <div class="success-message" id="main-success-message" style="display: none;"></div>
 
+    <!-- 其余主界面内容保持不变 -->
+</div>
             <!-- 标签页 -->
             <div class="tab-container">
                 <div class="tab active" onclick="switchTab('dashboard')">📊 数据</div>
@@ -370,8 +368,11 @@
         let currentData = null;
 
         // 显示消息
-        function showMessage(type, message) {
-    const element = document.getElementById(type + '-message');
+       // 显示消息
+function showMessage(type, message, isLoginScreen = false) {
+    const prefix = isLoginScreen ? 'login-' : 'main-';
+    const element = document.getElementById(prefix + type + '-message');
+    
     if (element) {
         element.textContent = message;
         element.style.display = 'block';
@@ -382,54 +383,60 @@
             }, 3000);
         }
     } else {
-        console.error('Element not found:', type + '-message');
+        console.warn('消息元素未找到:', prefix + type + '-message');
+        // 临时使用 alert
+        alert(message);
     }
 }
 
         // 隐藏消息
-        function hideMessages() {
-            document.getElementById('error-message').style.display = 'none';
-            document.getElementById('success-message').style.display = 'none';
-            document.getElementById('login-error').style.display = 'none';
+function hideMessages(isLoginScreen = false) {
+    const prefix = isLoginScreen ? 'login-' : 'main-';
+    const errorElement = document.getElementById(prefix + 'error-message');
+    const successElement = document.getElementById(prefix + 'success-message');
+    
+    if (errorElement) errorElement.style.display = 'none';
+    if (successElement) successElement.style.display = 'none';
+}
+
+// 登录功能
+async function login() {
+    hideMessages(true); // 隐藏登录界面的消息
+    
+    const email = document.getElementById('loginEmail').value.trim();
+    const password = document.getElementById('loginPassword').value;
+
+    if (!email || !password) {
+        showMessage('error', '请输入邮箱和密码', true);
+        return;
+    }
+
+    try {
+        const API_BASE = window.location.origin + '/.netlify/functions/api';
+        const response = await fetch(`${API_BASE}/admin/login`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ email, password })
+        });
+
+        const result = await response.json();
+
+        if (result.success) {
+            currentUser = result.user;
+            document.getElementById('adminInfo').textContent = `${currentUser.name} - 超级管理员`;
+            document.getElementById('login-screen').style.display = 'none';
+            document.getElementById('main-screen').style.display = 'block';
+            showMessage('success', '登录成功！');
+            loadDashboardData();
+        } else {
+            showMessage('error', '登录失败: ' + result.message, true);
         }
-
-        // 登录功能
-        async function login() {
-            hideMessages();
-            
-            const email = document.getElementById('loginEmail').value.trim();
-            const password = document.getElementById('loginPassword').value;
-
-            if (!email || !password) {
-                showMessage('login-error', '请输入邮箱和密码');
-                return;
-            }
-
-            try {
-                const response = await fetch(`${API_BASE}/api/admin/login`, {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify({ email, password })
-                });
-
-                const result = await response.json();
-
-                if (result.success) {
-                    currentUser = result.user;
-                    document.getElementById('adminInfo').textContent = `${currentUser.name} - 超级管理员`;
-                    document.getElementById('login-screen').style.display = 'none';
-                    document.getElementById('main-screen').style.display = 'block';
-                    showMessage('success', '登录成功！');
-                    loadDashboardData();
-                } else {
-                    showMessage('login-error', '登录失败: ' + result.message);
-                }
-            } catch (error) {
-                showMessage('login-error', '网络错误，请检查连接');
-            }
-        }
+    } catch (error) {
+        showMessage('error', '网络错误，请检查连接', true);
+    }
+}
 
         // 退出登录
         function logout() {
